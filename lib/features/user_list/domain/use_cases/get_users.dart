@@ -8,9 +8,6 @@ class GetUsers {
   GetUsers(this.repository);
 
   Future<List<User>> call({required UserParams params}) async {
-    return await repository.getUsers(
-      page: params.page,
-      perPage: params.perPage,
-    );
+    return await repository.getUsers(page: params.page, perPage: params.perPage);
   }
 }

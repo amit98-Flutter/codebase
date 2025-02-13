@@ -1,6 +1,5 @@
 import 'package:codebase/core/utils/form_submission_status.dart';
 import 'package:codebase/core/widget/vertical_spacer.dart';
-import 'package:codebase/features/user_list/domain/entities/user.dart';
 import 'package:codebase/features/user_list/presentation/bloc/user_bloc.dart';
 import 'package:codebase/features/user_list/presentation/widgets/no_data_view.dart';
 import 'package:codebase/features/user_list/presentation/widgets/shimmer_user_card.dart';
@@ -8,6 +7,7 @@ import 'package:codebase/features/user_list/presentation/widgets/user_card.dart'
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:lazy_load_scrollview/lazy_load_scrollview.dart';
 
 class UserListView extends StatefulWidget {
   const UserListView({super.key});
@@ -23,7 +23,7 @@ class _UserListViewState extends State<UserListView> {
   void initState() {
     super.initState();
     context.read<UserBloc>().add(OnFetchUsersCalled());
-   // _scrollController.addListener(_onScroll);
+    // _scrollController.addListener(_onScroll);
   }
 
   void _onScroll() {
@@ -47,17 +47,21 @@ class _UserListViewState extends State<UserListView> {
         }
 
         return state.filteredUsers.isNotEmpty
-            ? ListView.separated(
-                shrinkWrap: true,
-                scrollDirection: Axis.vertical,
-                controller: _scrollController,
-                itemCount: state.filteredUsers.length,
-                padding: REdgeInsets.all(8),
-                physics: const ClampingScrollPhysics(),
-                itemBuilder: (context, index) => UserCard(index: index),
-                separatorBuilder: (BuildContext context, int index) {
-                  return VerticalSpacer(height: 12.h);
-                })
+            ? LazyLoadScrollView(
+                onEndOfPage: () {
+                  context.read<UserBloc>().onLoadMore();
+                },
+                child: ListView.separated(
+                    scrollDirection: Axis.vertical,
+                    controller: _scrollController,
+                    itemCount: state.filteredUsers.length,
+                    padding: REdgeInsets.all(8),
+                    physics: const BouncingScrollPhysics(),
+                    itemBuilder: (context, index) => UserCard(index: index),
+                    separatorBuilder: (BuildContext context, int index) {
+                      return VerticalSpacer(height: 12.h);
+                    }),
+              )
             : const NoDataView();
       },
     );

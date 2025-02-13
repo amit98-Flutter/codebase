@@ -58,7 +58,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
   }
 
   Future<void> _onFetchUsersCalled(OnFetchUsersCalled event, Emitter<UserState> emit) async {
-    if (event.isRefreshing == false) {
+    if (event.isRefreshing == false ) {
       emit(state.copyWith(formStatus: const Loading2Status()));
     }
     try {
@@ -68,7 +68,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
           : [...state.users, ...users]; // Append to existing list
 
       add(OnUserListAdded(users: updatedUsers));
-      emit(state.copyWith(filteredUsers: users));
+      emit(state.copyWith(filteredUsers: updatedUsers));
       add(OnTotalCountChanged(mTotalCount: 12));
     } catch (error) {
       CommonFunctions.showErrorSnackBar(error.toString());
@@ -79,8 +79,10 @@ class UserBloc extends Bloc<UserEvent, UserState> {
   }
 
   void onLoadMore() {
-    page++;
-    add(OnFetchUsersCalled(isLoadMore: true));
+    if(state.mTotalCount != state.users.length){
+      page++;
+      add(OnFetchUsersCalled(isLoadMore: true));
+    }
   }
 
   void onRefresh() async {

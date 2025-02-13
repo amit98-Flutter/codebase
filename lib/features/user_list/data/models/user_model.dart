@@ -2,7 +2,7 @@ import 'package:codebase/features/user_list/domain/entities/user.dart';
 
 
 class UserModel extends User {
-  UserModel({
+  const UserModel({
     required super.id,
     required super.firstName,
     required super.lastName,
