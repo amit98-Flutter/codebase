@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:codebase/core/theme/app_color.dart';
 import 'package:codebase/core/theme/fonts.dart';
-import 'package:codebase/core/utils/app_router.dart';
+import 'package:codebase/core/route/app_router.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';

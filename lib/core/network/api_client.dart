@@ -35,7 +35,7 @@ class ApiClient {
 
     dio.interceptors.add(PrettyDioLogger());
 
-    return ApiClient._(dio, cacheOptions); // ✅ Return initialized instance
+    return ApiClient._(dio, cacheOptions); //Return initialized instance
   }
 
   ///  GET request with centralized error handling

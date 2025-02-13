@@ -4,6 +4,7 @@ import 'package:codebase/core/network/api_client.dart';
 import 'package:codebase/core/utils/common_functions.dart';
 import 'package:codebase/core/utils/form_submission_status.dart';
 import 'package:codebase/features/user_list/domain/entities/user.dart';
+import 'package:codebase/features/user_list/domain/entities/user_params.dart';
 import 'package:codebase/features/user_list/domain/use_cases/get_users.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
@@ -20,8 +21,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
   DateTime? currentBackPressTime;
   RefreshController refreshController = RefreshController(initialRefresh: false);
 
-
-  UserBloc(this.getUsers) : super(UserState()) {
+  UserBloc({required this.getUsers}) : super(UserState()) {
     on<OnInternetConnectionChanged>(_onInternetConnectionChanged);
     on<OnUserListAdded>(_onUserListAdded);
     on<OnCanPopNowChanged>(_onCanPopNowChanged);
@@ -62,9 +62,9 @@ class UserBloc extends Bloc<UserEvent, UserState> {
       emit(state.copyWith(formStatus: const Loading2Status()));
     }
     try {
-      final users = await getUsers(page, perPage);
+      final users = await getUsers(params: UserParams(page, perPage));
       List<User> updatedUsers = (page == 1)
-          ? users  // Reset list if first page
+          ? users // Reset list if first page
           : [...state.users, ...users]; // Append to existing list
 
       add(OnUserListAdded(users: updatedUsers));
@@ -78,7 +78,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     }
   }
 
-  void onLoadMore(){
+  void onLoadMore() {
     page++;
     add(OnFetchUsersCalled(isLoadMore: true));
   }
@@ -139,7 +139,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
   Future<void> checkInternetConnection() async {
     bool checkInternet = await CommonFunctions.checkInternetConnectivity();
     add(OnInternetConnectionChanged(checkInternet));
-    if(!checkInternet){
+    if (!checkInternet) {
       CommonFunctions.showErrorSnackBar("No Internet Connection");
     }
   }
