@@ -1,3 +1,4 @@
+import 'package:codebase/core/theme/app_color.dart';
 import 'package:codebase/core/utils/form_submission_status.dart';
 import 'package:codebase/core/widget/vertical_spacer.dart';
 import 'package:codebase/features/user_list/presentation/bloc/user_bloc.dart';
@@ -7,7 +8,7 @@ import 'package:codebase/features/user_list/presentation/widgets/user_card.dart'
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:lazy_load_scrollview/lazy_load_scrollview.dart';
+import 'package:lazy_load_refresh_indicator/lazy_load_refresh_indicator.dart';
 
 class UserListView extends StatefulWidget {
   const UserListView({super.key});
@@ -17,20 +18,19 @@ class UserListView extends StatefulWidget {
 }
 
 class _UserListViewState extends State<UserListView> {
-  final ScrollController _scrollController = ScrollController();
+  late ScrollController scrollController = ScrollController();
+  bool isLoading = false;
 
   @override
   void initState() {
     super.initState();
     context.read<UserBloc>().add(OnFetchUsersCalled());
-    // _scrollController.addListener(_onScroll);
   }
 
-  void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 100) {
-      // Trigger pagination when the user is close to the bottom
-      context.read<UserBloc>().onLoadMore();
-    }
+  @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -47,13 +47,24 @@ class _UserListViewState extends State<UserListView> {
         }
 
         return state.filteredUsers.isNotEmpty
-            ? LazyLoadScrollView(
+            ? LazyLoadRefreshIndicator(
                 onEndOfPage: () {
-                  context.read<UserBloc>().onLoadMore();
+                  if (context.read<UserBloc>().page < state.mTotalCount) {
+                    setState(() => isLoading = true);
+                    context.read<UserBloc>().page++;
+                    context.read<UserBloc>().add(OnFetchUsersCalled(isLoadMore: true));
+                    setState(() => isLoading = false);
+                  }
+                },
+                isLoading: isLoading,
+                color: AppColors.primaryColor,
+
+                onRefresh: () async {
+                  context.read<UserBloc>().onRefresh();
                 },
                 child: ListView.separated(
                     scrollDirection: Axis.vertical,
-                    controller: _scrollController,
+                    controller: scrollController,
                     itemCount: state.filteredUsers.length,
                     padding: REdgeInsets.all(8),
                     physics: const BouncingScrollPhysics(),

@@ -1,5 +1,5 @@
-import 'package:codebase/features/user_list/domain/entities/user.dart';
+import 'package:codebase/features/user_list/data/models/user_response.dart';
 
 abstract class UserRepository {
-  Future<List<User>> getUsers({required int page, required int perPage});
+  Future<UserResponse> getUsers({required int page, required int perPage});
 }

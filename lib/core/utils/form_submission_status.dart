@@ -13,6 +13,10 @@ class Loading2Status extends FormSubmissionStatus {
   const Loading2Status();
 }
 
+class LoadMoreStatus extends FormSubmissionStatus {
+  const LoadMoreStatus();
+}
+
 class SuccessStatus extends FormSubmissionStatus {
   final Widget? page;
   final Object? arguments;

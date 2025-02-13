@@ -9,7 +9,6 @@ import 'package:codebase/features/user_list/domain/use_cases/get_users.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:pull_to_refresh_flutter3/pull_to_refresh_flutter3.dart';
 
 part 'user_event.dart';
 part 'user_state.dart';
@@ -19,7 +18,6 @@ class UserBloc extends Bloc<UserEvent, UserState> {
   int page = 1;
   int perPage = 10;
   DateTime? currentBackPressTime;
-  RefreshController refreshController = RefreshController(initialRefresh: false);
 
   UserBloc({required this.getUsers}) : super(UserState()) {
     on<OnInternetConnectionChanged>(_onInternetConnectionChanged);
@@ -58,32 +56,27 @@ class UserBloc extends Bloc<UserEvent, UserState> {
   }
 
   Future<void> _onFetchUsersCalled(OnFetchUsersCalled event, Emitter<UserState> emit) async {
-    if (event.isRefreshing == false ) {
+    if (event.isRefreshing == false && event.isLoadMore == false) {
       emit(state.copyWith(formStatus: const Loading2Status()));
+    }else if (event.isLoadMore == true){
+      emit(state.copyWith(formStatus: const LoadMoreStatus()));
     }
     try {
-      final users = await getUsers(params: UserParams(page, perPage));
+      final result = await getUsers(params: UserParams(page, perPage));
       List<User> updatedUsers = (page == 1)
-          ? users // Reset list if first page
-          : [...state.users, ...users]; // Append to existing list
+          ? result.users // Reset list if first page
+          : [...state.users, ...result.users]; // Append to existing list
 
       add(OnUserListAdded(users: updatedUsers));
       emit(state.copyWith(filteredUsers: updatedUsers));
-      add(OnTotalCountChanged(mTotalCount: 12));
+      add(OnTotalCountChanged(mTotalCount: result.total));
     } catch (error) {
       CommonFunctions.showErrorSnackBar(error.toString());
     } finally {
       emit(state.copyWith(formStatus: const InitialState()));
-      refreshController.refreshCompleted();
     }
   }
 
-  void onLoadMore() {
-    if(state.mTotalCount != state.users.length){
-      page++;
-      add(OnFetchUsersCalled(isLoadMore: true));
-    }
-  }
 
   void onRefresh() async {
     add(OnFetchUsersCalled(isRefreshing: true));

@@ -6,7 +6,6 @@ import 'package:codebase/features/user_list/presentation/widgets/no_internet_vie
 import 'package:codebase/features/user_list/service_locator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:pull_to_refresh_flutter3/pull_to_refresh_flutter3.dart';
 
 class UserListPage extends StatelessWidget {
   const UserListPage({super.key});
@@ -43,12 +42,7 @@ class UserListPage extends StatelessWidget {
                     context.read<UserBloc>().add(OnSearchVisibleChanged(isVisible));
                   },
                 ),
-                body: SmartRefresher(
-                  controller: context.read<UserBloc>().refreshController,
-                  onRefresh: context.read<UserBloc>().onRefresh,
-                  enablePullDown: !state.isSearchVisible,
-                  child: const UserListView(),
-                ),
+                body: const UserListView(),
               ) : const NoInternetView(),
             );
           },
